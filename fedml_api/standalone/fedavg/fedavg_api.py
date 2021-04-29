@@ -8,7 +8,6 @@ import wandb
 
 from fedml_api.standalone.fedavg.client import Client
 
-
 class FedAvgAPI(object):
     def __init__(self, dataset, device, args, model_trainer):
         self.device = device
@@ -60,8 +59,10 @@ class FedAvgAPI(object):
                                             self.test_data_local_dict[client_idx],
                                             self.train_data_local_num_dict[client_idx])
 
-                # train on new dataset
+                # train and quant on new dataset
                 w = client.train(w_global)
+                w = client.quant(b_w=4)
+
                 # self.logger.info("local weights = " + str(w))
                 w_locals.append((client.get_sample_number(), copy.deepcopy(w)))
 

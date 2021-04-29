@@ -1,5 +1,5 @@
 import logging
-
+from fedml_api.standalone.fedavg.q_utils import haq_quantize_model
 
 class Client:
 
@@ -37,3 +37,10 @@ class Client:
             test_data = self.local_training_data
         metrics = self.model_trainer.test(test_data, self.device, self.args)
         return metrics
+
+    def quant(self, b_w=8):
+        model_quant = haq_quantize_model(self.model_trainer, b_w=b_w)
+        self.model_trainer.set_model_params(model_quant.get_model_params())
+
+        weights = self.model_trainer.get_model_params()
+        return weights

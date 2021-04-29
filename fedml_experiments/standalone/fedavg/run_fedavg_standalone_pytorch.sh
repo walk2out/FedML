@@ -18,13 +18,26 @@ DISTRIBUTION=$8
 
 ROUND=$9
 
-EPOCH=$10
+EPOCH=${10}
 
-LR=$11
+LR=${11}
 
-OPT=$12
+OPT=${12}
 
-CI=$13
+CI=${13}
+
+echo ${client_num_in_total}
+echo ${client_num_per_round}
+echo ${BATCH_SIZE}
+echo ${ROUND}
+echo ${EPOCH}
+echo ${LR}
+echo ${OPT}
+echo ${CI}
+
+# n=1
+# g=$(($n<8?$n:8))
+# srun --mpi=pmi2 -p ad_rd -n$n --gres=gpu:$g --ntasks-per-node=$g \
 
 python3 ./main_fedavg.py \
 --gpu $GPU \
