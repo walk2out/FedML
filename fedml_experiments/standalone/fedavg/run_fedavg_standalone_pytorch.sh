@@ -26,6 +26,8 @@ OPT=${12}
 
 CI=${13}
 
+BW=${14}
+
 echo ${client_num_in_total}
 echo ${client_num_per_round}
 echo ${BATCH_SIZE}
@@ -34,6 +36,7 @@ echo ${EPOCH}
 echo ${LR}
 echo ${OPT}
 echo ${CI}
+echo ${BW}
 
 # n=1
 # g=$(($n<8?$n:8))
@@ -52,4 +55,5 @@ python3 ./main_fedavg.py \
 --batch_size $BATCH_SIZE \
 --client_optimizer $OPT \
 --lr $LR \
---ci $CI
+--ci $CI \
+--b_w $BW

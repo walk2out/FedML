@@ -31,4 +31,4 @@ round() {
 
 # 1. MNIST standalone FedAvg
 cd ./fedml_experiments/standalone/fedavg
-sh run_fedavg_standalone_pytorch.sh 0 10 10 10 fed_cifar100 ./../../../data/fed_cifar100/datasets resnet18_gn hetero 4000 1 0.1 sgd 0
+sh run_fedavg_standalone_pytorch.sh 0 10 10 10 fed_cifar100 ./../../../data/fed_cifar100/datasets resnet18_gn hetero 4000 1 0.1 sgd 0 3

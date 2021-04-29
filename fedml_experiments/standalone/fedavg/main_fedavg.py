@@ -88,6 +88,8 @@ def add_args(parser):
 
     parser.add_argument('--ci', type=int, default=0,
                         help='CI')
+    parser.add_argument('--b_w', type=int, default=8,
+                        help='bit width')
     return parser
 
 

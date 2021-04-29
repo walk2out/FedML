@@ -61,8 +61,7 @@ class FedAvgAPI(object):
 
                 # train and quant on new dataset
                 w = client.train(w_global)
-                w = client.quant(b_w=4)
-
+                w = client.quant(b_w=self.args.b_w)
                 # self.logger.info("local weights = " + str(w))
                 w_locals.append((client.get_sample_number(), copy.deepcopy(w)))
 
