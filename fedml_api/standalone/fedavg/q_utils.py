@@ -57,7 +57,7 @@ def linear_quantize(input, scale, zero_point, inplace=False):
     return torch.round(scale * input - zero_point)
 
 def asym_linear_quantize(input, b_w, c):
-    if b_w > 0.0 and b_w < 8.0:
+    if b_w > 0.0 and b_w < 32.0:
         scale = c / (2 ** (b_w - 1))
         fmin = -(2 ** (b_w - 1)) * scale
         fmax = (2 ** (b_w - 1) - 1) * scale
@@ -113,10 +113,11 @@ def haq_quantize_param(param_fp, b_w, c):
 
 def find_threshold(param_fp, b_w, c_old, n=20, step=0.001):
     min_c = 0
-    KL_min = 10
+    KL_min = 100000
     for c in np.linspace(max(c_old - step, step), c_old + step, n):
         q_weight = asym_linear_quantize(param_fp, b_w, c)
-        KL_loss = F.kl_div(param_fp, q_weight)
+        # KL_loss = F.kl_div(param_fp, q_weight)
+        KL_loss = (param_fp - q_weight).abs().sum()
         if KL_loss < KL_min:
             KL_min = KL_loss
             min_c = c
@@ -126,7 +127,7 @@ def find_threshold(param_fp, b_w, c_old, n=20, step=0.001):
 def haq_quantize_model(model_fp, b_w=8):
     for name, module in model_fp.model.named_modules():
         if isinstance(module, nn.Conv2d):
-            c_old = module.weight.data.abs().max() .cpu()
+            c_old = module.weight.data.abs().max().cpu()
             min_c = find_threshold(module.weight.data, b_w, c_old)
             module.weight.data[...] = haq_quantize_param(module.weight.data, b_w, min_c)
 
