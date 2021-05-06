@@ -105,6 +105,15 @@ class SymLinearQuantizeSTE(torch.autograd.Function):
 
 ##################################################################################################
 ##################################################################################################
+def Read_list(filename):
+    file1 = open(filename, "r")
+    list_row =file1.readlines()
+    list_source = []
+    for i in range(len(list_row)):
+        column_list = list_row[i].strip().split(" ")
+        list_source.append(column_list)
+    file1.close()
+    return list_source
 
 def haq_quantize_param(param_fp, b_w, c):
     out = SymLinearQuantizeSTE.apply(param_fp, b_w, c)
@@ -124,11 +133,16 @@ def find_threshold(param_fp, b_w, c_old, n=20, step=0.001):
     #     print('max-mean-c_old-min_c: ', param_fp.abs().max(), param_fp.abs().mean(), c_old, min_c)
     return min_c
 
-def haq_quantize_model(model_fp, b_w=8):
-    for name, module in model_fp.model.named_modules():
+def haq_quantize_model(model_fp, b_w=32, mp_list=None):
+    conv_idx = -1
+    model_quant = deepcopy(model_fp)
+    for name, module in model_quant.model.named_modules():
         if isinstance(module, nn.Conv2d):
+            conv_idx = conv_idx + 1
+            if mp_list is not None:
+                b_w = mp_list[conv_idx]
             c_old = module.weight.data.abs().max().cpu()
             min_c = find_threshold(module.weight.data, b_w, c_old)
             module.weight.data[...] = haq_quantize_param(module.weight.data, b_w, min_c)
 
-    return model_fp
+    return model_quant

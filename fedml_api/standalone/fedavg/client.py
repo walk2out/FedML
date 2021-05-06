@@ -1,5 +1,7 @@
 import logging
+import numpy as np
 from fedml_api.standalone.fedavg.q_utils import haq_quantize_model
+from fedml_api.standalone.fedavg.q_utils import Read_list
 
 class Client:
 
@@ -38,8 +40,16 @@ class Client:
         metrics = self.model_trainer.test(test_data, self.device, self.args)
         return metrics
 
-    def quant(self, b_w=8):
-        model_quant = haq_quantize_model(self.model_trainer, b_w=b_w)
+    def quant(self, b_w=8, mp_list_path=''):
+        if mp_list_path is not None:
+            mp_lists = Read_list(mp_list_path)
+            mp_list = np.empty([len(mp_lists)], dtype = int)
+            for ii in range(len(mp_lists)):
+                mp_list[ii] = int(mp_lists[ii][2])
+        else:
+            mp_list = None
+
+        model_quant = haq_quantize_model(self.model_trainer, b_w=b_w, mp_list=mp_list)
         self.model_trainer.set_model_params(model_quant.get_model_params())
 
         weights = self.model_trainer.get_model_params()

@@ -29,6 +29,7 @@ from fedml_api.model.nlp.rnn import RNN_OriginalFedAvg, RNN_StackOverFlow
 from fedml_api.data_preprocessing.MNIST.data_loader import load_partition_data_mnist
 from fedml_api.model.linear.lr import LogisticRegression
 from fedml_api.model.cv.resnet_gn import resnet18
+from fedml_api.model.cv.resnet_20_gn import resnet20
 
 from fedml_api.standalone.fedavg.fedavg_api import FedAvgAPI
 from fedml_api.standalone.fedavg.my_model_trainer_classification import MyModelTrainer as MyModelTrainerCLS
@@ -90,6 +91,8 @@ def add_args(parser):
                         help='CI')
     parser.add_argument('--b_w', type=int, default=8,
                         help='bit width')
+    parser.add_argument('--mp_list_path', type=str, default='',
+                        help='mixed precision settings path')
     return parser
 
 
@@ -237,7 +240,7 @@ def combine_batches(batches):
     return [(full_x, full_y)]
 
 
-def create_model(args, model_name, output_dim):
+def create_model(args, model_name, output_dim, ):
     logging.info("create_model. model_name = %s, output_dim = %s" % (model_name, output_dim))
     model = None
     if model_name == "lr" and args.dataset == "mnist":
@@ -248,7 +251,10 @@ def create_model(args, model_name, output_dim):
         model = CNN_DropOut(False)
     elif model_name == "resnet18_gn" and args.dataset == "fed_cifar100":
         logging.info("ResNet18_GN + Federated_CIFAR100")
-        model = resnet18()
+        model = resnet18(num_classes=output_dim)
+    elif model_name == "resnet20_gn" and args.dataset == "fed_cifar100":
+        logging.info("ResNet20_GN + Federated_CIFAR100")
+        model = resnet20(num_classes=output_dim)
     elif model_name == "rnn" and args.dataset == "shakespeare":
         logging.info("RNN + shakespeare")
         model = RNN_OriginalFedAvg()
@@ -288,11 +294,13 @@ if __name__ == "__main__":
     device = torch.device("cuda:" + str(args.gpu) if torch.cuda.is_available() else "cpu")
     logger.info(device)
 
+    '''
     wandb.init(
         project="fedml",
         name="FedAVG-r" + str(args.comm_round) + "-e" + str(args.epochs) + "-lr" + str(args.lr),
         config=args
     )
+    '''
 
     # Set the random seed. The np.random seed determines the dataset partition.
     # The torch_manual_seed determines the initial weight.

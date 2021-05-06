@@ -43,7 +43,7 @@ DATASET=fed_cifar100
 
 DATA_PATH=./../../../data/fed_cifar100/datasets
 
-MODEL=resnet18_gn
+MODEL=resnet20_gn
 
 DISTRIBUTION=hetero
 
@@ -59,6 +59,8 @@ CI=0
 
 BW=16
 
+MP_PATH='./parameters/mixed_precision_settings.txt'
+
 echo ${CLIENT_NUM}
 echo ${WORKER_NUM}
 echo ${BATCH_SIZE}
@@ -68,10 +70,11 @@ echo ${LR}
 echo ${OPT}
 echo ${CI}
 echo ${BW}
+echo ${MP_PATH}
 
 n=1
 g=$(($n<8?$n:8))
-srun --mpi=pmi2 -p ad_rd -n$n --gres=gpu:$g --ntasks-per-node=$g \
+srun --mpi=pmi2 -p Test -n$n --gres=gpu:$g --ntasks-per-node=$g \
 python3 ./main_fedavg.py \
 --gpu $GPU \
 --dataset $DATASET \
@@ -87,4 +90,5 @@ python3 ./main_fedavg.py \
 --lr $LR \
 --ci $CI \
 --b_w $BW \
-2>&1 | tee logs/0505_quant_lr_${LR}_client_num_${WORKER_NUM}_bw_${BW}.log
+--mp_list_path ${MP_PATH} \
+2>&1 | tee logs/0506_mp_model_${MODEL}_lr_${LR}_client_num_${WORKER_NUM}_bw_${BW}.log

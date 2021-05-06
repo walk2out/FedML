@@ -8,6 +8,8 @@ import wandb
 
 from fedml_api.standalone.fedavg.client import Client
 
+
+
 class FedAvgAPI(object):
     def __init__(self, dataset, device, args, model_trainer):
         self.device = device
@@ -61,7 +63,8 @@ class FedAvgAPI(object):
 
                 # train and quant on new dataset
                 w = client.train(w_global)
-                w = client.quant(b_w=self.args.b_w)
+                if (self.args.b_w > 0.0 and self.args.b_w < 32.0) or self.args.mp_list_path is not None:
+                    w = client.quant(b_w=self.args.b_w, mp_list_path=self.args.mp_list_path)
                 # self.logger.info("local weights = " + str(w))
                 w_locals.append((client.get_sample_number(), copy.deepcopy(w)))
 
@@ -170,13 +173,13 @@ class FedAvgAPI(object):
         test_loss = sum(test_metrics['losses']) / sum(test_metrics['num_samples'])
 
         stats = {'training_acc': train_acc, 'training_loss': train_loss}
-        wandb.log({"Train/Acc": train_acc, "round": round_idx})
-        wandb.log({"Train/Loss": train_loss, "round": round_idx})
+        # wandb.log({"Train/Acc": train_acc, "round": round_idx})
+        # wandb.log({"Train/Loss": train_loss, "round": round_idx})
         logging.info(stats)
 
         stats = {'test_acc': test_acc, 'test_loss': test_loss}
-        wandb.log({"Test/Acc": test_acc, "round": round_idx})
-        wandb.log({"Test/Loss": test_loss, "round": round_idx})
+        # wandb.log({"Test/Acc": test_acc, "round": round_idx})
+        # wandb.log({"Test/Loss": test_loss, "round": round_idx})
         logging.info(stats)
 
 
@@ -196,18 +199,18 @@ class FedAvgAPI(object):
             test_acc = test_metrics['test_correct'] / test_metrics['test_total']
             test_loss = test_metrics['test_loss'] / test_metrics['test_total']
             stats = {'test_acc': test_acc, 'test_loss': test_loss}
-            wandb.log({"Test/Acc": test_acc, "round": round_idx})
-            wandb.log({"Test/Loss": test_loss, "round": round_idx})
+            # wandb.log({"Test/Acc": test_acc, "round": round_idx})
+            # wandb.log({"Test/Loss": test_loss, "round": round_idx})
         elif self.args.dataset == "stackoverflow_lr":
             test_acc = test_metrics['test_correct'] / test_metrics['test_total']
             test_pre = test_metrics['test_precision'] / test_metrics['test_total']
             test_rec = test_metrics['test_recall'] / test_metrics['test_total']
             test_loss = test_metrics['test_loss'] / test_metrics['test_total']
             stats = {'test_acc': test_acc, 'test_pre': test_pre, 'test_rec': test_rec, 'test_loss': test_loss}
-            wandb.log({"Test/Acc": test_acc, "round": round_idx})
-            wandb.log({"Test/Pre": test_pre, "round": round_idx})
-            wandb.log({"Test/Rec": test_rec, "round": round_idx})
-            wandb.log({"Test/Loss": test_loss, "round": round_idx})
+            # wandb.log({"Test/Acc": test_acc, "round": round_idx})
+            # wandb.log({"Test/Pre": test_pre, "round": round_idx})
+            # wandb.log({"Test/Rec": test_rec, "round": round_idx})
+            # wandb.log({"Test/Loss": test_loss, "round": round_idx})
         else:
             raise Exception("Unknown format to log metrics for dataset {}!"%self.args.dataset)
 
