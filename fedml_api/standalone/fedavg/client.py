@@ -41,7 +41,7 @@ class Client:
         return metrics
 
     def quant(self, b_w=8, mp_list_path=''):
-        if mp_list_path is not None:
+        if len(mp_list_path):
             mp_lists = Read_list(mp_list_path)
             mp_list = np.empty([len(mp_lists)], dtype = int)
             for ii in range(len(mp_lists)):

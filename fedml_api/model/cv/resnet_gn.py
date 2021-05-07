@@ -108,24 +108,27 @@ class Bottleneck(nn.Module):
 class ResNet(nn.Module):
 
     def __init__(self, block, layers, num_classes=1000, group_norm=0):
-        self.inplanes = 64
+        # self.inplanes = 64
+        self.inplanes = 16
+        inplanes = 16
+
         super(ResNet, self).__init__()
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
                                bias=False)
-        self.bn1 = norm2d(64, group_norm)
+        self.bn1 = norm2d(self.inplanes, group_norm)
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0],
+        self.layer1 = self._make_layer(block, inplanes * 1, layers[0],
                                        group_norm=group_norm)
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
+        self.layer2 = self._make_layer(block, inplanes * 2, layers[1], stride=2,
                                        group_norm=group_norm)
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
+        self.layer3 = self._make_layer(block, inplanes * 4, layers[2], stride=2,
                                        group_norm=group_norm)
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
+        self.layer4 = self._make_layer(block, inplanes * 8, layers[3], stride=2,
                                        group_norm=group_norm)
         # self.avgpool = nn.AvgPool2d(7, stride=1)
         self.avgpool = nn.AvgPool2d(1)
-        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.fc = nn.Linear(inplanes * 8 * block.expansion, num_classes)
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
